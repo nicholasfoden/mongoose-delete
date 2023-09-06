@@ -228,12 +228,23 @@ module.exports = function (schema, options) {
         });
     }
 
-    schema.methods.delete = function (deletedBy, cb) {
+    schema.methods.delete = function (deletedBy, options, cb) {
         if (typeof deletedBy === 'function') {
           cb = deletedBy;
           deletedBy = null;
         }
-
+        
+        if (typeof deletedBy === 'object'){
+          cb = options
+          options = deletedBy
+          deltetedBy = null
+        }
+        
+        if (typeof options === 'function') {
+          cb = options, 
+          options = {}
+        }
+    
         this.deleted = true;
 
         if (schema.path('deletedAt')) {
@@ -245,10 +256,10 @@ module.exports = function (schema, options) {
         }
 
         if (options.validateBeforeDelete === false) {
-            return this.save({ validateBeforeSave: false }, cb);
+            return this.save({...options, validateBeforeSave: false }, cb);
         }
 
-        return this.save(cb);
+        return this.save(cb, options);
     };
 
     schema.statics.delete =  function (conditions, deletedBy, callback) {
